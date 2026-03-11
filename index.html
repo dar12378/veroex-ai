@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,28 +14,34 @@
 <h1>VEROEX AI</h1>
 <p class="subtitle">Intelligence Made Simple</p>
 
-<div class="search-box">
-<input id="homeInput" placeholder="What can I help you with?" />
-<button onclick="sendMessage()">AI</button>
+<div class="search">
+<input id="homeInput" placeholder="What can I help you with?">
+<button id="askBtn">AI</button>
 </div>
 
 <div class="grid">
 
 <button onclick="openAI()">💬 Chat with AI</button>
-
 <button onclick="summary()">✨ Summarize Messages</button>
-
-<button onclick="openReminder()">🔔 Create Reminder</button>
-
-<button onclick="openTasks()">✅ My Tasks</button>
-
-<button onclick="openTranslate()">🌐 Translate</button>
-
-<button onclick="openClock()">🕒 World Clock</button>
+<button onclick="reminder()">🔔 Create Reminder</button>
+<button onclick="tasks()">✅ My Tasks</button>
+<button onclick="translate()">🌐 Translate</button>
+<button onclick="clock()">🕒 World Clock</button>
 
 </div>
 
-<div id="screen"></div>
+<div id="chat" class="chat hidden">
+
+<h2>Chat with AI</h2>
+
+<div id="messages"></div>
+
+<div class="chatInput">
+<input id="chatInput" placeholder="Type message">
+<button onclick="send()">Send</button>
+</div>
+
+</div>
 
 </div>
 
