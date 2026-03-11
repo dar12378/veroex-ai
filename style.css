@@ -1,0 +1,216 @@
+const homeInput = document.getElementById("homeInput");
+const sendHomeBtn = document.getElementById("sendHomeBtn");
+const assistantInput = document.getElementById("assistantInput");
+const assistantSendBtn = document.getElementById("assistantSendBtn");
+const chatBox = document.getElementById("chatBox");
+const quickButtons = document.querySelectorAll(".quick-btn");
+const navButtons = document.querySelectorAll(".nav-btn");
+const homeCards = document.querySelectorAll(".card");
+const screens = {
+  assistant: document.getElementById("assistantScreen"),
+  chat: document.getElementById("chatScreen"),
+  translate: document.getElementById("translateScreen"),
+  reminders: document.getElementById("remindersScreen"),
+  tasks: document.getElementById("tasksScreen"),
+  clock: document.getElementById("clockScreen"),
+};
+const homeGrid = document.getElementById("homeGrid");
+const reminderText = document.getElementById("reminderText");
+const reminderTime = document.getElementById("reminderTime");
+const saveReminderBtn = document.getElementById("saveReminderBtn");
+const tasksList = document.getElementById("tasksList");
+const reminderCount = document.getElementById("reminderCount");
+const londonTime = document.getElementById("londonTime");
+const clockList = document.getElementById("clockList");
+const translateInput = document.getElementById("translateInput");
+const languageSelect = document.getElementById("languageSelect");
+const translateOutput = document.getElementById("translateOutput");
+
+let currentTab = "home";
+let reminders = [];
+
+const translations = {
+  Spanish: "Hola, llegaré en 30 minutos.",
+  Hebrew: "שלום, אגיע בעוד 30 דקות.",
+  French: "Bonjour, j’arriverai dans 30 minutes.",
+  German: "Hallo, ich komme in 30 Minuten an.",
+  Arabic: "مرحبًا، سأصل خلال 30 دقيقة.",
+  Japanese: "こんにちは、30分後に到着します。",
+  Korean: "안녕하세요, 30분 후에 도착할게요."
+};
+
+function showTab(tab) {
+  currentTab = tab;
+
+  Object.values(screens).forEach(screen => screen.classList.add("hidden"));
+
+  if (tab !== "home" && screens[tab]) {
+    screens[tab].classList.remove("hidden");
+  }
+
+  const homeVisible = tab === "home";
+  homeInput.parentElement.style.display = homeVisible ? "flex" : "none";
+  homeGrid.style.display = homeVisible ? "grid" : "none";
+  document.querySelector(".workspace-box").style.display = homeVisible ? "block" : "none";
+
+  navButtons.forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.tab === tab);
+  });
+
+  if (tab === "tasks") renderTasks();
+  if (tab === "clock") renderClock();
+}
+
+function addBubble(text, role) {
+  const bubble = document.createElement("div");
+  bubble.className = `bubble ${role}`;
+  bubble.textContent = text;
+  chatBox.appendChild(bubble);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function getReply(prompt) {
+  const q = prompt.toLowerCase();
+
+  if (q.includes("time") || q.includes("london")) {
+    return `London time is ${getLondonTime()}. Right now, London is aligned for work hours.`;
+  }
+
+  if (q.includes("summary") || q.includes("summarize")) {
+    return "Here’s the short version: meeting tomorrow at 10, bring the updated file, and confirm attendance.";
+  }
+
+  if (q.includes("translate")) {
+    return `Translation to ${languageSelect.value}: ${translateOutput.textContent}`;
+  }
+
+  if (q.includes("remind") || q.includes("reminder") || q.includes("task")) {
+    return "I can save that as a reminder and show it in your tasks list.";
+  }
+
+  return "I can help with summaries, reminders, translations, and world time.";
+}
+
+function sendToAssistant(text) {
+  const prompt = (text || assistantInput.value || homeInput.value).trim();
+  if (!prompt) return;
+
+  showTab("assistant");
+  addBubble(prompt, "user");
+  addBubble(getReply(prompt), "assistant");
+
+  assistantInput.value = "";
+  homeInput.value = "";
+}
+
+function saveReminder() {
+  const text = reminderText.value.trim();
+  const when = reminderTime.value.trim();
+
+  if (!text) return;
+
+  reminders.unshift({ text, when });
+  reminderText.value = "";
+  renderTasks();
+  updateReminderCount();
+  showTab("tasks");
+}
+
+function renderTasks() {
+  if (!reminders.length) {
+    tasksList.innerHTML = `<div class="simple-box">No tasks yet.</div>`;
+    return;
+  }
+
+  tasksList.innerHTML = reminders
+    .map(
+      item => `
+      <div class="simple-box">
+        <strong>${item.text}</strong><br>
+        <span style="color: rgba(255,255,255,0.5)">${item.when}</span>
+      </div>
+    `
+    )
+    .join("");
+}
+
+function getLondonTime() {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Europe/London"
+  }).format(new Date());
+}
+
+function renderClock() {
+  const zones = [
+    { city: "Tel Aviv", tz: "Asia/Jerusalem" },
+    { city: "London", tz: "Europe/London" },
+    { city: "New York", tz: "America/New_York" },
+    { city: "Tokyo", tz: "Asia/Tokyo" }
+  ];
+
+  clockList.innerHTML = zones
+    .map(zone => {
+      const time = new Intl.DateTimeFormat("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: zone.tz
+      }).format(new Date());
+
+      return `
+        <div class="simple-box" style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <strong>${zone.city}</strong><br>
+            <span style="color: rgba(255,255,255,0.5)">${zone.tz}</span>
+          </div>
+          <div style="color:#bae6fd">${time}</div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function updateReminderCount() {
+  reminderCount.textContent = reminders.length;
+  londonTime.textContent = getLondonTime();
+}
+
+function updateTranslation() {
+  translateOutput.textContent = translations[languageSelect.value] || translateInput.value;
+}
+
+sendHomeBtn.addEventListener("click", () => sendToAssistant());
+assistantSendBtn.addEventListener("click", () => sendToAssistant());
+
+homeInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendToAssistant();
+});
+
+assistantInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendToAssistant();
+});
+
+quickButtons.forEach(btn => {
+  btn.addEventListener("click", () => sendToAssistant(btn.textContent));
+});
+
+homeCards.forEach(card => {
+  card.addEventListener("click", () => showTab(card.dataset.tab));
+});
+
+navButtons.forEach(btn => {
+  btn.addEventListener("click", () => showTab(btn.dataset.tab));
+});
+
+saveReminderBtn.addEventListener("click", saveReminder);
+languageSelect.addEventListener("change", updateTranslation);
+translateInput.addEventListener("input", updateTranslation);
+
+updateReminderCount();
+renderTasks();
+renderClock();
+updateTranslation();
+showTab("home");
