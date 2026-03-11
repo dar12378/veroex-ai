@@ -1,66 +1,57 @@
-body{
-background:#030507;
-color:white;
-font-family:Arial;
-display:flex;
-justify-content:center;
-padding:40px;
+function openAI(){
+document.getElementById("chat").classList.remove("hidden")
 }
 
-.app{
-width:380px;
-background:#0a0f17;
-padding:25px;
-border-radius:20px;
-box-shadow:0 0 40px black;
+function summary(){
+alert("Summary: meeting tomorrow at 10 and bring the updated file.")
 }
 
-h1{
-text-align:center;
+function reminder(){
+alert("Reminder created.")
 }
 
-.subtitle{
-text-align:center;
-color:#9ca3af;
-margin-bottom:25px;
+function tasks(){
+alert("You have no tasks yet.")
 }
 
-.search-box{
-display:flex;
-gap:10px;
-margin-bottom:20px;
+function translate(){
+alert("Translation: Hola, llegaré en 30 minutos.")
 }
 
-.search-box input{
-flex:1;
-padding:12px;
-border-radius:10px;
-border:none;
+function clock(){
+
+let time=new Date().toLocaleTimeString()
+
+alert("Current time: "+time)
 }
 
-.search-box button{
-background:#22d3ee;
-border:none;
-padding:12px;
-border-radius:10px;
-cursor:pointer;
-}
+function send(){
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-}
+let input=document.getElementById("chatInput")
+let text=input.value
 
-.grid button{
-padding:15px;
-border:none;
-border-radius:12px;
-background:#111827;
-color:white;
-cursor:pointer;
-}
+if(!text) return
 
-#screen{
-margin-top:20px;
+let messages=document.getElementById("messages")
+
+let user=document.createElement("div")
+user.className="msgUser"
+user.innerText=text
+messages.appendChild(user)
+
+let ai=document.createElement("div")
+ai.className="msgAI"
+
+if(text.includes("כמה מדינות"))
+ai.innerText="יש בעולם 195 מדינות."
+
+else if(text.includes("time"))
+ai.innerText="London time: "+new Date().toLocaleTimeString()
+
+else
+ai.innerText="VEROEX AI understood your request."
+
+messages.appendChild(ai)
+
+input.value=""
 }
